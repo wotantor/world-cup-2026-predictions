@@ -5,12 +5,17 @@ import time
 # Добавляем переменную для робота-бэкапера
 SPREADSHEET_ID = '1YinKp12GwM3VZAoYYWk142kfCxEXMGtzcd9GBZm1-xY'
 
-# Ссылка для скачивания без кэша
+# ЖЕСТКИЙ АНТИ-КЭШ: заставляем Google каждый раз отдавать самую свежую версию ячеек
 timestamp = int(time.time())
-url = f"https://google.com{SPREADSHEET_ID}/export?format=csv&gid=0&t={timestamp}"
+url = f"https://google.com{SPREADSHEET_ID}/export?format=csv&gid=0&nocache={timestamp}"
 
 try:
-    response = urllib.request.urlopen(url)
+    # Добавляем заголовки, чтобы прикинуться обычным браузером
+    req = urllib.request.Request(
+        url, 
+        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    )
+    response = urllib.request.urlopen(req)
     lines = [line.decode('utf-8') for line in response.readlines()]
     reader = csv.reader(lines)
     rows = list(reader)
@@ -22,7 +27,7 @@ try:
     header = rows[0]  # Первая строчка с именами
     players_data = []
     
-    # УМНЫЙ ПОИСК: сканируем абсолютно ВСЕ столбцы в первой строке
+    # Сканируем абсолютно ВСЕ столбцы в первой строке таблицы
     for i in range(len(header)):
         column_name = header[i].strip()
         
@@ -34,7 +39,7 @@ try:
             exact_scores = 0
             outcomes = 0
             
-            # Колонка баллов ВСЕГДА идет следующей за колонкой прогноза
+            # Колонка баллов всегда идет следующей за колонкой прогноза
             points_col_idx = i + 1
             
             # Считаем баллы по строкам матчей (со 2 по 73)
@@ -59,7 +64,7 @@ try:
     # Сортируем участников по убыванию очков
     players_data.sort(key=lambda x: x['points'], reverse=True)
     
-    # Строим Markdown-таблицу
+    # Строим новую Markdown-таблицу Лидерборда
     markdown_table = "| 🔝 Место | 👤 Участник | 🎯 Всего очков | 🟢 Точный счёт (3 б.) | 🟡 Исходы (1 б.) |\n"
     markdown_table += "| :---: | :--- | :---: | :---: | :---: |\n"
     
@@ -70,7 +75,7 @@ try:
         elif place == 3: medal = "🥉 **3**"
         markdown_table += f"| {medal} | {p['name']} | **{p['points']}** | {p['exact']} | {p['outcomes']} |\n"
 
-    # Итоговый текст README.md
+    # Итоговый текст README.md с намертво вшитой правильной ссылкой на вашу таблицу
     readme_content = f"""# 🏆 ЧМ-2026 | Прогнозы Manowarus
 
 Добро пожаловать в репозиторий нашего закрытого турнира прогнозов на Чемпионат мира по футболу 2026! ⚽️
