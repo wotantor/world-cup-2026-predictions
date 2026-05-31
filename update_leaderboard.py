@@ -5,10 +5,9 @@ import time
 # Добавляем переменную для робота-бэкапера
 SPREADSHEET_ID = '1YinKp12GwM3VZAoYYWk142kfCxEXMGtzcd9GBZm1-xY'
 
-# Явно прописываем чистую ссылку на вашу таблицу, обходя любые кэши Google
+# Ссылка для скачивания Лидерборда напрямую в формате CSV без кэша Google
 timestamp = int(time.time())
 url = f"https://google.com{SPREADSHEET_ID}/export?format=csv&gid=0&t={timestamp}"
-
 
 try:
     response = urllib.request.urlopen(url)
@@ -20,7 +19,7 @@ try:
         print("Таблица пустая")
         exit()
         
-    header = rows[0]
+    header = rows
     players_data = []
     
     for i in range(7, len(header), 2):
@@ -66,12 +65,12 @@ try:
         elif place == 3: medal = "🥉 **3**"
         markdown_table += f"| {medal} | {p['name']} | **{p['points']}** | {p['exact']} | {p['outcomes']} |\n"
 
-    # Итоговый текст README.md с намертво зашитой чистой и проверенной ссылкой на вашу таблицу
+    # Итоговый текст README.md с жестко зашитой ссылкой на вашу таблицу
     readme_content = f"""# 🏆 ЧМ-2026 | Прогнозы Manowarus
 
 Добро пожаловать в репозиторий нашего закрытого турнира прогнозов на Чемпионат мира по футболу 2026! ⚽️
 
-📊 **[Кликни сюда, чтобы открыть нашу Google Таблицу и сделать прогноз](https://google.com)**
+📊 **[Кликни сюда, чтобы открыть нашу Google Таблицу и сделать прогноз](https://google.com1YinKp12GwM3VZAoYYWk142kfCxEXMGtzcd9GBZm1-xY/edit?gid=0#gid=0)**
 
 ---
 
