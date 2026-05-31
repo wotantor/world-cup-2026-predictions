@@ -2,9 +2,13 @@ import urllib.request
 import csv
 import time
 
+# Добавляем переменную для робота-бэкапера
+SPREADSHEET_ID = '1YinKp12GwM3VZAoYYWk142kfCxEXMGtzcd9GBZm1-xY'
+
 # Явно прописываем чистую ссылку на вашу таблицу, обходя любые кэши Google
 timestamp = int(time.time())
-url = f"https://google.com{timestamp}"
+url = f"https://google.com{SPREADSHEET_ID}/export?format=csv&gid=0&t={timestamp}"
+
 
 try:
     response = urllib.request.urlopen(url)
