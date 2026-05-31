@@ -78,7 +78,7 @@ try:
         
         markdown_table += f"| {medal} | {p['name']} | **{p['points']}** | {p['exact']} | {p['outcomes']} |\n"
 
-    # Формируем итоговый README.md
+       # Формируем итоговый README.md
     readme_content = f"""# 🏆 ЧМ-2026 | Прогнозы Manowarus
 
 Добро пожаловать в репозиторий нашего закрытого турнира прогнозов на Чемпионат мира по футболу 2026! ⚽️
@@ -103,6 +103,10 @@ try:
     with open("README.md", "w", encoding="utf-8") as f:
         f.write(readme_content)
     print("README успешно обновлен напрямую с Лист1!")
+
+except Exception as e:
+    print(f"Ошибка: {e}")
+
 
 except Exception as e:
     print(f"Ошибка: {e}")
