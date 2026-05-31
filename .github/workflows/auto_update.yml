@@ -1,0 +1,30 @@
+name: Auto Update Leaderboard from Google Sheets
+
+on:
+  schedule:
+    # Запуск каждый день в 06:00 по МСК (03:00 по UTC)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # Позволяет запускать обновление вручную кнопкой
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Проверка кода
+      uses: actions/checkout@v4
+
+    - name: Настройка Python
+      uses: actions/setup-python@v5
+      with:
+        python-python-version: '3.x'
+
+    - name: Запуск скрипта обновления
+      run: python update_leaderboard.py
+
+    - name: Сохранение изменений в README
+      run: |
+        git config --global user.name 'GitHub Action Bot'
+        git config --global user.email 'actions@github.com'
+        git add README.md
+        git commit -m "Авто-обновление таблицы лидеров ЧМ-2026" || echo "Нет изменений"
+        git push
