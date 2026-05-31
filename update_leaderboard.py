@@ -5,7 +5,15 @@ import time
 # Идентификатор вашей таблицы
 SPREADSHEET_ID = '1YinKp12GwM3VZAoYYWk142kfCxEXMGtzcd9GBZm1-xY'
 
-# Пробиваем кэш Google Таблиц с помощью случайного секундного маркера времени
+# 🔥 СПИСОК ДЛЯ РУЧНОЙ ЗАМЕНЫ: если Google кэширует имена, впишите их сюда.
+# Слева пишем то, что сейчас отображается на GitHub, справа — реальное имя друга.
+MANUAL_NAMES = {
+    "Друг 2": "Стас",
+    "Друг 3": "Миша",  # Пример для будущего
+    "Друг 4": "Саня"   # Пример для будущего
+}
+
+# Пробиваем кэш Google Таблиц
 timestamp = int(time.time())
 url = f"https://google.com{SPREADSHEET_ID}/export?format=csv&gid=0&t={timestamp}"
 
@@ -20,16 +28,20 @@ try:
         print("Ошибка: Таблица пустая или не удалось прочитать строки.")
         exit()
         
-    header = rows[0]  # Первая строчка с именами участников
+    header = rows  # Первая строчка с именами участников
     players_data = []
     
-    # Сканируем всю первую строку таблицы в поисках колонок участников
+    # Сканируем всю первую строку таблицы
     for i in range(len(header)):
         column_name = header[i].strip()
         
         # Если нашли ячейку со словом Прогноз, значит это наш игрок
         if "Прогноз" in column_name:
             player_name = column_name.replace("Прогноз:", "").replace("Прогноз", "").strip()
+            
+            # 🔥 ПРИНУДИТЕЛЬНАЯ ЗАМЕНА ИМЕНИ: проверяем наш список
+            if player_name in MANUAL_NAMES:
+                player_name = MANUAL_NAMES[player_name]
             
             total_points = 0
             exact_scores = 0
@@ -71,7 +83,7 @@ try:
         elif place == 3: medal = "🥉 **3**"
         markdown_table += f"| {medal} | {p['name']} | **{p['points']}** | {p['exact']} | {p['outcomes']} |\n"
 
-    # Итоговый текст README.md с кликабельной рабочей ссылкой
+    # Итоговый текст README.md со 100% правильной ссылкой
     readme_content = f"""# 🏆 ЧМ-2026 | Прогнозы Manowarus
 
 Добро пожаловать в репозиторий нашего закрытого турнира прогнозов на Чемпионат мира по футболу 2026! ⚽️
@@ -95,7 +107,7 @@ try:
 
     with open("README.md", "w", encoding="utf-8") as f:
         f.write(readme_content)
-    print("README успешно обновлен по прямым данным таблицы!")
+    print("README успешно обновлен с применением списка принудительных имен!")
 
 except Exception as e:
     print(f"Ошибка выполнения скрипта: {e}")
