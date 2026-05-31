@@ -1,4 +1,4 @@
-name: Auto Update Leaderboard from Google Sheets
+name: Auto Update Leaderboard and Backup
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch: # Позволяет запускать обновление вручную кнопкой
 
 jobs:
-  update-readme:
+  update-and-backup:
     runs-on: ubuntu-latest
     steps:
     - name: Проверка кода
@@ -16,15 +16,20 @@ jobs:
     - name: Настройка Python
       uses: actions/setup-python@v5
       with:
-        python-python-version: '3.x'
+        python-version: '3.x'
 
     - name: Запуск скрипта обновления
       run: python update_leaderboard.py
 
-    - name: Сохранение изменений в README
+    - name: Создание резервной копии Excel (Бэкап)
+      run: |
+        ID=$(python -c "import update_leaderboard; print(update_leaderboard.SPREADSHEET_ID)")
+        curl -L "https://google.com" -o "backup_world_cup_2026.xlsx"
+
+    - name: Сохранение изменений в README и бэкапа
       run: |
         git config --global user.name 'GitHub Action Bot'
         git config --global user.email 'actions@github.com'
-        git add README.md
-        git commit -m "Авто-обновление таблицы лидеров ЧМ-2026" || echo "Нет изменений"
+        git add README.md backup_world_cup_2026.xlsx
+        git commit -m "Авто-обновление и создание бэкапа таблицы" || echo "Нет изменений"
         git push
