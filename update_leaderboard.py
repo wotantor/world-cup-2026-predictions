@@ -5,7 +5,10 @@ import csv
 SPREADSHEET_ID = '1YinKp12GwM3VZAoYYWk142kfCxEXMGtzcd9GBZm1-xY'
 
 # Запрашиваем первый лист (Лист1), где все данные реальные
-url = f"https://google.com{SPREADSHEET_ID}/export?format=csv&gid=0"
+import time
+timestamp = int(time.time())
+url = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/export?format=csv&gid=0&t={timestamp}"
+
 
 try:
     response = urllib.request.urlopen(url)
