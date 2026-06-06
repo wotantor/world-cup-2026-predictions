@@ -5,7 +5,7 @@ import time
 # Идентификатор вашей таблицы
 SPREADSHEET_ID = '1YinKp12GwM3VZAoYYWk142kfCxEXMGtzcd9GBZm1-xY'
 
-# Пробиваем кэш Google Таблиц (исправлена ссылка на экспорт)
+# Пробиваем кэш Google Таблиц
 timestamp = int(time.time())
 url = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/export?format=csv&gid=0&t={timestamp}"
 
@@ -23,50 +23,44 @@ try:
     header = rows[0]  # Первая строчка с именами участников
     players_data = []
     
-    # Список названий технических колонок, которые нужно игнорировать
-    # (допишите сюда через запятую, если у вас в начале идут другие столбцы, например: "Дата", "Время")
-    tech_columns = ["Матч", "Счет", "Счёт", "Дата", "Время", "Группа", ""]
-
     # Сканируем всю первую строку таблицы
     for i in range(len(header)):
         column_name = header[i].strip()
         
-        # Если колонка пустая или это технический столбец матча — пропускаем
-        if not column_name or any(tech in column_name for tech in tech_columns):
-            continue
+        # Ищем строго те колонки, где есть слово "Прогноз"
+        if "Прогноз" in column_name:
+            # Вытаскиваем имя друга (убираем "Прогноз:" и пробелы)
+            player_name = column_name.replace("Прогноз:", "").replace("Прогноз", "").strip()
             
-        # Если колонка называется "Баллы" или "Очки", значит это технический столбец подсчета, а не имя друга
-        if "Балл" in column_name or "Очки" in column_name:
-            continue
-
-        # Всё остальное — это имя друга! (Убираем "Прогноз:", если вдруг кто-то его оставит)
-        player_name = column_name.replace("Прогноз:", "").replace("Прогноз", "").strip()
-        
-        total_points = 0
-        exact_scores = 0
-        outcomes = 0
-        
-        # Колонка баллов всегда идет следом за колонкой прогноза (i + 1)
-        points_col_idx = i + 1
-        
-        # Считаем баллы по всем матчам со 2 по 73 строку
-        for row in rows[1:73]:
-            if points_col_idx >= len(row):
-                continue
-            val = row[points_col_idx].strip()
-            if val == "3":
-                total_points += 3
-                exact_scores += 1
-            elif val == "1":
-                total_points += 1
-                outcomes += 1
-                
-        players_data.append({
-            'name': player_name,
-            'points': total_points,
-            'exact': exact_scores,
-            'outcomes': outcomes
-        })
+            # Если двоеточие убрали, а имя осталось пустым (например, просто слово "Прогноз")
+            if not player_name:
+                player_name = f"Участник {i}"
+            
+            total_points = 0
+            exact_scores = 0
+            outcomes = 0
+            
+            # Колонка баллов ВСЕГДА идет следующей за прогнозом (i + 1)
+            points_col_idx = i + 1
+            
+            # Считаем баллы по всем матчам со 2 строки (индекс 1) до конца таблицы результатов
+            for row in rows[1:]:
+                if points_col_idx >= len(row):
+                    continue
+                val = row[points_col_idx].strip()
+                if val == "3":
+                    total_points += 3
+                    exact_scores += 1
+                elif val == "1":
+                    total_points += 1
+                    outcomes += 1
+                    
+            players_data.append({
+                'name': player_name,
+                'points': total_points,
+                'exact': exact_scores,
+                'outcomes': outcomes
+            })
         
     # Сортируем участников по убыванию очков
     players_data.sort(key=lambda x: x['points'], reverse=True)
@@ -82,7 +76,7 @@ try:
         elif place == 3: medal = "🥉 **3**"
         markdown_table += f"| {medal} | {p['name']} | **{p['points']}** | {p['exact']} | {p['outcomes']} |\n"
 
-    # Итоговый текст README.md с исправленной ссылкой на саму таблицу
+    # Итоговый текст README.md
     readme_content = f"""# 🏆 ЧМ-2026 | Прогнозы Manowarus
 
 Добро пожаловать в репозиторий нашего закрытого турнира прогнозов на Чемпионат мира по футболу 2026! ⚽️
@@ -106,7 +100,7 @@ try:
 
     with open("README.md", "w", encoding="utf-8") as f:
         f.write(readme_content)
-    print("README успешно обновлен автоматически!")
+    print("README успешно обновлен! Все игроки найдены.")
 
 except Exception as e:
     print(f"Ошибка выполнения скрипта: {e}")
